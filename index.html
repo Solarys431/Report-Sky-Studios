@@ -3,99 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reportistica Tecnica TV</title>
+    <title>Sistema di Reportistica Professionale</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Inserisci un nuovo report</h1>
-        <form id="reportForm">
-            <input type="hidden" id="editIndex" value="">
-
-            <label for="dateTime">Data e Ora:</label>
-            <input type="datetime-local" id="dateTime" name="dateTime" required><br><br>
-
-            <label for="production">Produzione:</label>
-            <select name="production" id="production" required>
-                <option value="TG24">TG24</option>
-                <option value="SS24">SS24</option>
-                <option value="Sky Calcio Club">Sky Calcio Club</option>
-                <option value="Monday Night">Monday Night</option>
-                <option value="Friday Night">Friday Night</option>
-                <option value="L'Originale">L'Originale</option>
-                <option value="UCL">UCL</option>
-                <option value="UEL">UEL</option>
-                <option value="Conference League">Conference League</option>
-                <option value="Moto GP">Moto GP</option>
-                <option value="F1">F1</option>
-            </select><br><br>
-
-            <label for="issue">Problema:</label>
-            <select name="issue" id="issue" required>
-                <option value="Problema Audio">Problema Audio</option>
-                <option value="Problema Video">Problema Video</option>
-                <option value="Problema di Engineering">Problema di Engineering</option>
-                <option value="Errore umano">Errore Umano</option>
-                <option value="Errore Tecnico">Problema Tecnico</option>
-                <option value="Errore Grafico">Problema Grafico</option>
-                <option value="Errore Multiplay">Problema Multiplay</option>
-                <option value="Errore WatchOut">Problema WatchOut</option>
-            </select><br><br>
-
-            <label for="resolution">Risoluzione:</label>
-            <select name="resolution" id="resolution" required>
-                <option value="Risolto">Risolto</option>
-                <option value="In attesa di risoluzione">In attesa di risoluzione</option>
-                <option value="Comunicato ad Engineering">Comunicato ad Engineering</option>
-            </select><br><br>
-
-            <label for="notes">Note:</label><br>
-            <textarea name="notes" id="notes" rows="4" cols="50"></textarea><br><br>
-
-            <button type="submit">Inserisci</button>
-        </form>
-
-        <h2>Storico Report</h2>
-
-        <div class="filter-group">
-            <label for="filterDate">Filtra per Data:</label>
-            <select id="filterDate">
-                <option value="all">Tutte le Date</option>
-            </select>
-
-            <label for="filterProduction">Filtra per Produzione:</label>
-            <select id="filterProduction">
-                <option value="all">Tutte le Produzioni</option>
-            </select>
-
-            <label for="filterIssue">Filtra per Problema:</label>
-            <select id="filterIssue">
-                <option value="all">Tutti i Problemi</option>
-            </select>
+    <div class="container mt-5">
+        <h1 class="mb-4">Sistema di Reportistica Professionale</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Inserisci un nuovo report</h2>
+            </div>
+            <div class="card-body">
+                <form id="reportForm">
+                    <input type="hidden" id="editIndex">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="dateTime" class="form-label">Data e Ora:</label>
+                            <input type="datetime-local" id="dateTime" name="dateTime" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="production" class="form-label">Produzione:</label>
+                            <select id="production" name="production" class="form-select" required>
+                                <option value="">Seleziona produzione</option>
+                                <option value="TG24">TG24</option>
+                                <option value="SS24">SS24</option>
+                                <option value="Sky Calcio Club">Sky Calcio Club</option>
+                                <option value="Monday Night">Monday Night</option>
+                                <option value="Friday Night">Friday Night</option>
+                                <option value="L'Originale">L'Originale</option>
+                                <option value="UCL">UCL</option>
+                                <option value="UEL">UEL</option>
+                                <option value="Conference League">Conference League</option>
+                                <option value="Moto GP">Moto GP</option>
+                                <option value="F1">F1</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="issue" class="form-label">Problema:</label>
+                            <select id="issue" name="issue" class="form-select" required>
+                                <option value="">Seleziona problema</option>
+                                <option value="Problema Audio">Problema Audio</option>
+                                <option value="Problema Video">Problema Video</option>
+                                <option value="Problema di Engineering">Problema di Engineering</option>
+                                <option value="Errore Umano">Errore Umano</option>
+                                <option value="Problema Tecnico">Problema Tecnico</option>
+                                <option value="Problema Grafico">Problema Grafico</option>
+                                <option value="Problema Multiplay">Problema Multiplay</option>
+                                <option value="Problema WatchOut">Problema WatchOut</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="resolution" class="form-label">Risoluzione:</label>
+                            <select id="resolution" name="resolution" class="form-select" required>
+                                <option value="">Seleziona risoluzione</option>
+                                <option value="Risolto">Risolto</option>
+                                <option value="In attesa di risoluzione">In attesa di risoluzione</option>
+                                <option value="Comunicato ad Engineering">Comunicato ad Engineering</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Note:</label>
+                        <textarea id="notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Inserisci Report</button>
+                </form>
+            </div>
         </div>
 
-        <table id="reportTable">
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th>Produzione</th>
-                    <th>Problema</th>
-                    <th>Risoluzione</th>
-                    <th>Note</th>
-                    <th>Azioni</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- I report saranno inseriti qui -->
-            </tbody>
-        </table>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Storico Report</h2>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="filterDate" class="form-label">Filtra per Data:</label>
+                        <select id="filterDate" class="form-select">
+                            <option value="all">Tutte le Date</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="filterProduction" class="form-label">Filtra per Produzione:</label>
+                        <select id="filterProduction" class="form-select">
+                            <option value="all">Tutte le Produzioni</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="filterIssue" class="form-label">Filtra per Problema:</label>
+                        <select id="filterIssue" class="form-select">
+                            <option value="all">Tutti i Problemi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table id="reportTable" class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Produzione</th>
+                                <th>Problema</th>
+                                <th>Risoluzione</th>
+                                <th>Note</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-        <!-- Area del grafico -->
-        <h2>Grafico dei Problemi per Mese, Produzione e Causa</h2>
-        <canvas id="issueChart" width="400" height="200"></canvas>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="mb-0">Grafico dei Problemi per Mese, Produzione e Causa</h2>
+            </div>
+            <div class="card-body">
+                <canvas id="issueChart"></canvas>
+            </div>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
