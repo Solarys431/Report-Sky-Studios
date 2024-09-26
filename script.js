@@ -2,7 +2,7 @@
 const GITHUB_USERNAME = 'solarys431';
 const GITHUB_REPO = 'Report-Sky-Studios';
 const GITHUB_FILE_PATH = 'reports.json';
-const GITHUB_TOKEN = 'YOUR_GITHUB_PERSONAL_ACCESS_TOKEN'; // Sostituisci con il tuo token
+const GITHUB_TOKEN = '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'; // Sostituisci con il tuo token
 
 // Funzione per salvare i report in localStorage
 function saveReportsToLocalStorage(reports) {
