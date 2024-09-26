@@ -1,125 +1,46 @@
-// Configurazione GitHub
-const GITHUB_USERNAME = 'solarys431';
-const GITHUB_REPO = 'Report-Sky-Studios';
-const GITHUB_FILE_PATH = 'reports.json';
-const GITHUB_TOKEN = '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'; // Sostituisci con il tuo token
+// Configurazione JSONBin
+const BIN_ID = '66f591daad19ca34f8ae0b22'; // Sostituisci con il tuo Bin ID
+const API_KEY = '$2a$10$z.gsA2cdHbVfQZ6rB8VKw.kv0kkW1KsuMYDim97yQsCw.fYk1S0j2'; // Sostituisci con la tua X-Master-Key
 
-// Verifica iniziale dell'accesso all'API di GitHub
-fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}`, {
-    headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`
-    }
-})
-.then(response => {
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-})
-.then(data => {
-    console.log('Accesso al repository GitHub confermato:', data.name);
-})
-.catch(error => {
-    console.error('Errore nell\'accesso al repository GitHub:', error);
-    alert('Si è verificato un errore nell\'accesso al repository GitHub. Verifica il token e le impostazioni.');
-});
-
-// Funzione per salvare i report in localStorage
-function saveReportsToLocalStorage(reports) {
-    localStorage.setItem('reports', JSON.stringify(reports));
-}
-
-// Funzione per caricare i report da localStorage
-function loadReportsFromLocalStorage() {
-    const reports = localStorage.getItem('reports');
-    return reports ? JSON.parse(reports) : [];
-}
-
-// Funzione per caricare i report da GitHub
-async function loadReportsFromGitHub() {
+// Funzione per caricare i report da JSONBin
+async function loadReportsFromJSONBin() {
     try {
-        const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+            method: 'GET',
             headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`
+                'X-Master-Key': API_KEY
             }
         });
         if (!response.ok) {
-            if (response.status === 404) {
-                console.log('Il file reports.json non esiste ancora su GitHub.');
-                return [];
-            }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        const content = atob(data.content);
-        console.log('Dati caricati da GitHub:', content); // Log per debug
-        const reports = JSON.parse(content);
-        saveReportsToLocalStorage(reports); // Salva una copia in localStorage
-        return reports;
+        console.log('Dati caricati da JSONBin:', data.record);
+        return data.record.reports || [];
     } catch (error) {
-        console.error('Errore nel caricamento dei report da GitHub:', error);
-        return loadReportsFromLocalStorage(); // Carica da localStorage in caso di errore
+        console.error('Errore nel caricamento dei report da JSONBin:', error);
+        return [];
     }
 }
 
-// Funzione per salvare i report su GitHub
-async function saveReportsToGitHub(reports) {
+// Funzione per salvare i report su JSONBin
+async function saveReportsToJSONBin(reports) {
     try {
-        // Prova a ottenere il file esistente
-        const currentFileResponse = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
-            headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`
-            }
-        });
-
-        let sha;
-        if (currentFileResponse.status === 404) {
-            // Il file non esiste, lo creeremo
-            console.log('Il file reports.json non esiste. Verrà creato.');
-            sha = null;
-        } else if (!currentFileResponse.ok) {
-            throw new Error(`HTTP error! status: ${currentFileResponse.status}`);
-        } else {
-            // Il file esiste, otteniamo il suo SHA
-            const currentFile = await currentFileResponse.json();
-            sha = currentFile.sha;
-        }
-
-        // Prepara il contenuto del file
-        const content = btoa(JSON.stringify(reports));
-
-        // Prepara il corpo della richiesta
-        const body = {
-            message: 'Aggiornamento reports',
-            content: content,
-        };
-
-        // Se abbiamo un SHA, includiamolo (per aggiornare il file esistente)
-        if (sha) {
-            body.sha = sha;
-        }
-
-        // Invia la richiesta per creare o aggiornare il file
-        const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
             method: 'PUT',
             headers: {
-                'Authorization': `token ${GITHUB_TOKEN}`,
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-Master-Key': API_KEY
             },
-            body: JSON.stringify(body)
+            body: JSON.stringify({ reports: reports })
         });
-
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(`HTTP error! status: ${response.status}, message: ${JSON.stringify(errorData)}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        console.log('Reports salvati con successo su GitHub');
-        saveReportsToLocalStorage(reports); // Aggiorna anche la copia locale
+        console.log('Reports salvati con successo su JSONBin');
     } catch (error) {
-        console.error('Errore nel salvataggio dei report su GitHub:', error);
-        alert('Si è verificato un errore nel salvataggio dei report su GitHub. I dati sono stati salvati localmente.');
-        saveReportsToLocalStorage(reports); // Salva comunque in localStorage
+        console.error('Errore nel salvataggio dei report su JSONBin:', error);
+        alert('Si è verificato un errore nel salvataggio dei report. Riprova più tardi.');
     }
 }
 
@@ -246,8 +167,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Funzione per caricare e visualizzare i report
     async function displayReports() {
         try {
-            reports = await loadReportsFromGitHub();
-            console.log('Report caricati:', reports); // Log per debug
+            reports = await loadReportsFromJSONBin();
+            console.log('Report caricati:', reports);
 
             reportTableBody.innerHTML = '';
 
@@ -286,7 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Gestione del form per salvare su GitHub
+    // Gestione del form per salvare su JSONBin
     reportForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -307,7 +228,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             editIndexField.value = "";
         }
 
-        await saveReportsToGitHub(reports);
+        await saveReportsToJSONBin(reports);
         await displayReports();
         reportForm.reset();
     });
@@ -326,7 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.deleteReport = async function(index) {
         if (confirm('Sei sicuro di voler eliminare questo report?')) {
             reports.splice(index, 1);
-            await saveReportsToGitHub(reports);
+            await saveReportsToJSONBin(reports);
             await displayReports();
         }
     };
