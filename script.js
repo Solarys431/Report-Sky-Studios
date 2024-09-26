@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const productions = [...new Set(reports.map(report => report.production))];
         const issues = [...new Set(reports.map(report => report.issue))];
 
-        // Per ogni combinazione di produzione e causa del problema, creiamo un dataset
+        // Creiamo un dataset per ogni combinazione di produzione e causa del problema
         productions.forEach(production => {
             issues.forEach(issue => {
                 const data = labels.map(month => {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         reports.forEach(report => {
             const date = new Date(report.dateTime);
-            const month = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+            const month = date.toLocaleString('default', { month: 'long', year: 'numeric' }); // Otteniamo il mese in formato testo
 
             // Inizializza la struttura dei dati
             if (!monthlyData[month]) {
