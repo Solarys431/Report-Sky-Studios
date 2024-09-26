@@ -15,11 +15,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const labels = Object.keys(productionData);
         const data = Object.values(productionData).map(problems => problems.length);
 
+        console.log("Labels: ", labels);  // Debug: Mostra le produzioni nel grafico
+        console.log("Data: ", data);      // Debug: Mostra i dati del grafico
+
         // Se il grafico esiste già, lo distruggiamo prima di crearne uno nuovo
         if (chart) chart.destroy();
 
         // Crea un nuovo grafico a barre
-        chart = new Chart(document.getElementById('issueChart'), {
+        const ctx = document.getElementById('issueChart').getContext('2d');
+        chart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels, // Produzioni
@@ -110,4 +114,16 @@ document.addEventListener('DOMContentLoaded', () => {
         reportForm.issue.value = report.issue;
         reportForm.resolution.value = report.resolution;
         reportForm.notes.value = report.notes;
-        editIndexField.value
+        editIndexField.value = index;  // Imposta l'indice del report che si sta modificando
+    };
+
+    // Funzione per rimuovere un report
+    window.deleteReport = function(index) {
+        reports.splice(index, 1);  // Rimuovi il report dall'array
+        localStorage.setItem('reports', JSON.stringify(reports)); // Aggiorna il localStorage
+        displayReports(); // Mostra nuovamente la tabella aggiornata
+    };
+
+    // Mostra i report salvati al caricamento della pagina
+    displayReports();
+});
