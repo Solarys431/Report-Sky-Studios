@@ -1,15 +1,53 @@
 document.addEventListener('DOMContentLoaded', () => {
     const reportForm = document.getElementById('reportForm');
     const reportTableBody = document.querySelector('#reportTable tbody');
-    const editIndexField = document.getElementById('editIndex'); // Campo nascosto per l'indice della modifica
+    const editIndexField = document.getElementById('editIndex');
 
     // Carica i report dal localStorage o crea un array vuoto
     let reports = JSON.parse(localStorage.getItem('reports')) || [];
 
+    // Dati per il grafico
+    let productionData = {};
+    let chart;
+
+    // Funzione per aggiornare il grafico
+    function updateChart() {
+        const labels = Object.keys(productionData);
+        const data = Object.values(productionData).map(problems => problems.length);
+
+        // Se il grafico esiste già, lo distruggiamo prima di crearne uno nuovo
+        if (chart) chart.destroy();
+
+        // Crea un nuovo grafico a barre
+        chart = new Chart(document.getElementById('issueChart'), {
+            type: 'bar',
+            data: {
+                labels: labels, // Produzioni
+                datasets: [{
+                    label: 'Numero di Problemi',
+                    data: data, // Numero di problemi per produzione
+                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
     // Funzione per mostrare i report nella tabella
     function displayReports() {
         reportTableBody.innerHTML = ''; // Svuota la tabella prima di inserire i nuovi dati
+        productionData = {}; // Resetta i dati per il grafico
+
         reports.forEach((report, index) => {
+            // Aggiungi i report alla tabella
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${report.dateTime}</td>
@@ -23,7 +61,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </td>
             `;
             reportTableBody.appendChild(row);
+
+            // Aggiorna i dati per il grafico
+            if (!productionData[report.production]) {
+                productionData[report.production] = [];
+            }
+            productionData[report.production].push(report.issue);
         });
+
+        updateChart(); // Aggiorna il grafico
     }
 
     // Aggiungi o modifica un report
@@ -64,16 +110,4 @@ document.addEventListener('DOMContentLoaded', () => {
         reportForm.issue.value = report.issue;
         reportForm.resolution.value = report.resolution;
         reportForm.notes.value = report.notes;
-        editIndexField.value = index;  // Imposta l'indice del report che si sta modificando
-    };
-
-    // Funzione per rimuovere un report
-    window.deleteReport = function(index) {
-        reports.splice(index, 1);  // Rimuovi il report dall'array
-        localStorage.setItem('reports', JSON.stringify(reports)); // Aggiorna il localStorage
-        displayReports(); // Mostra nuovamente la tabella aggiornata
-    };
-
-    // Mostra i report salvati al caricamento della pagina
-    displayReports();
-});
+        editIndexField.value
