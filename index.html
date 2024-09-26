@@ -10,6 +10,8 @@
     <div class="container">
         <h1>Inserisci un nuovo report</h1>
         <form id="reportForm">
+            <input type="hidden" id="editIndex" value="">
+            
             <label for="production">Produzione:</label>
             <select name="production" id="production" required>
                 <option value="TG24">TG24</option>
@@ -47,7 +49,7 @@
             <label for="notes">Note:</label><br>
             <textarea name="notes" id="notes" rows="4" cols="50"></textarea><br><br>
 
-            <button type="submit">Inserisci Report</button>
+            <button type="submit">Inserisci/Modifica Report</button>
         </form>
 
         <h2>Storico Report</h2>
@@ -59,6 +61,7 @@
                     <th>Problema</th>
                     <th>Risoluzione</th>
                     <th>Note</th>
+                    <th>Azioni</th>
                 </tr>
             </thead>
             <tbody>
