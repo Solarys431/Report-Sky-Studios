@@ -22,31 +22,26 @@ document.addEventListener('DOMContentLoaded', () => {
     function createChart(monthlyData) {
         const ctx = document.getElementById('issueChart').getContext('2d');
 
-        const labels = Object.keys(monthlyData); // Mesi
+        const labels = Object.keys(monthlyData);
         const datasets = [];
 
-        // Troviamo tutte le produzioni e le cause dei problemi
         const productions = [...new Set(reports.map(report => report.production))];
         const issues = [...new Set(reports.map(report => report.issue))];
 
-        // Creiamo un dataset per ogni combinazione di produzione e causa del problema
-        productions.forEach(production => {
-            issues.forEach(issue => {
-                const data = labels.map(month => {
-                    return monthlyData[month]?.[production]?.[issue] || 0;
-                });
+        productions.forEach((production, pIndex) => {
+            issues.forEach((issue, iIndex) => {
+                const data = labels.map(month => monthlyData[month]?.[production]?.[issue] || 0);
 
                 datasets.push({
-                    label: `${production} - ${issue}`, // Etichetta unendo produzione e problema
+                    label: `${production} - ${issue}`,
                     data: data,
-                    backgroundColor: getRandomColor(),
-                    borderColor: getRandomColor(),
+                    backgroundColor: `hsl(${(pIndex * 60 + iIndex * 30) % 360}, 70%, 50%)`,
+                    borderColor: `hsl(${(pIndex * 60 + iIndex * 30) % 360}, 70%, 40%)`,
                     borderWidth: 1
                 });
             });
         });
 
-        // Se un grafico esiste già, distruggilo prima di crearne uno nuovo
         if (chart) {
             chart.destroy();
         }
@@ -54,25 +49,31 @@ document.addEventListener('DOMContentLoaded', () => {
         chart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: labels, // Mesi
-                datasets: datasets // Dati per produzione e causa del problema
+                labels: labels,
+                datasets: datasets
             },
             options: {
+                responsive: true,
                 scales: {
+                    x: {
+                        stacked: true,
+                    },
                     y: {
+                        stacked: true,
                         beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Problemi per Mese, Produzione e Causa'
                     }
                 }
             }
         });
-    }
-
-    // Funzione per generare un colore casuale per le barre del grafico
-    function getRandomColor() {
-        const r = Math.floor(Math.random() * 255);
-        const g = Math.floor(Math.random() * 255);
-        const b = Math.floor(Math.random() * 255);
-        return `rgba(${r},${g},${b},0.6)`;
     }
 
     // Funzione per organizzare i report per mese, produzione e causa del problema
@@ -80,103 +81,63 @@ document.addEventListener('DOMContentLoaded', () => {
         let monthlyData = {};
 
         reports.forEach(report => {
-            // Aggiungiamo ':00Z' per completare il formato della data
-            const dateTimeString = report.dateTime + ':00Z';
-            const date = new Date(dateTimeString);
+            const date = new Date(report.dateTime);
+            const month = date.toLocaleString('default', { month: 'long', year: 'numeric' });
 
-            if (isNaN(date)) {
-                console.error('Data non valida:', report.dateTime);
-                return;
-            }
-
-            const month = date.toLocaleString('default', { month: 'long', year: 'numeric' }); // Otteniamo il mese in formato testo
-
-            // Inizializza la struttura dei dati
             if (!monthlyData[month]) {
                 monthlyData[month] = {};
             }
-
             if (!monthlyData[month][report.production]) {
                 monthlyData[month][report.production] = {};
             }
-
             if (!monthlyData[month][report.production][report.issue]) {
                 monthlyData[month][report.production][report.issue] = 0;
             }
 
-            // Incrementa il conteggio dei problemi per produzione e causa del problema
             monthlyData[month][report.production][report.issue]++;
         });
 
-        // Crea il grafico con i dati organizzati
         createChart(monthlyData);
     }
 
     // Funzione per popolare i filtri
     function populateFilters() {
-        // Popola il filtro per Data
-        const dates = [...new Set(reports.map(report => {
-            const dateTimeString = report.dateTime + ':00Z';
-            const date = new Date(dateTimeString);
-            return date.toLocaleDateString();
-        }))];
-
-        filterDate.innerHTML = '<option value="all">Tutte le Date</option>';
-        dates.forEach(date => {
-            const option = document.createElement('option');
-            option.value = date;
-            option.textContent = date;
-            filterDate.appendChild(option);
-        });
-
-        // Popola il filtro per Produzione
+        const dates = [...new Set(reports.map(report => new Date(report.dateTime).toLocaleDateString()))];
         const productions = [...new Set(reports.map(report => report.production))];
-        filterProduction.innerHTML = '<option value="all">Tutte le Produzioni</option>';
-        productions.forEach(prod => {
-            const option = document.createElement('option');
-            option.value = prod;
-            option.textContent = prod;
-            filterProduction.appendChild(option);
-        });
-
-        // Popola il filtro per Problema
         const issues = [...new Set(reports.map(report => report.issue))];
-        filterIssue.innerHTML = '<option value="all">Tutti i Problemi</option>';
-        issues.forEach(issue => {
-            const option = document.createElement('option');
-            option.value = issue;
-            option.textContent = issue;
-            filterIssue.appendChild(option);
+
+        populateFilter(filterDate, dates, 'Tutte le Date');
+        populateFilter(filterProduction, productions, 'Tutte le Produzioni');
+        populateFilter(filterIssue, issues, 'Tutti i Problemi');
+    }
+
+    function populateFilter(selectElement, options, allText) {
+        selectElement.innerHTML = `<option value="all">${allText}</option>`;
+        options.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.textContent = option;
+            selectElement.appendChild(optionElement);
         });
     }
 
     // Funzione per mostrare i report nella tabella
     function displayReports() {
-        reportTableBody.innerHTML = ''; // Svuota la tabella
+        reportTableBody.innerHTML = '';
 
         const selectedDate = filterDate.value;
         const selectedProduction = filterProduction.value;
         const selectedIssue = filterIssue.value;
 
         reports.forEach((report, index) => {
-            // Converte la stringa in un oggetto Date
-            const dateTimeString = report.dateTime + ':00Z';
-            const date = new Date(dateTimeString);
-
-            if (isNaN(date)) {
-                console.error('Data non valida nel report:', report.dateTime);
-                return;
-            }
-
+            const date = new Date(report.dateTime);
             const reportDateString = date.toLocaleDateString();
 
-            // Applica i filtri
             if (selectedDate !== 'all' && selectedDate !== reportDateString) return;
             if (selectedProduction !== 'all' && selectedProduction !== report.production) return;
             if (selectedIssue !== 'all' && selectedIssue !== report.issue) return;
 
             const row = document.createElement('tr');
-
             row.innerHTML = `
                 <td>${reportDateString}</td>
                 <td>${report.production}</td>
@@ -184,26 +145,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${report.resolution}</td>
                 <td>${report.notes}</td>
                 <td>
-                    <button class="edit" onclick="editReport(${index})">Modifica</button>
-                    <button class="delete" onclick="deleteReport(${index})">Rimuovi</button>
-                    <button class="send-mail" onclick="sendMail(${index})">Invia Mail</button>
+                    <button class="btn btn-sm btn-warning edit" onclick="editReport(${index})">Modifica</button>
+                    <button class="btn btn-sm btn-danger delete" onclick="deleteReport(${index})">Rimuovi</button>
+                    <button class="btn btn-sm btn-success send-mail" onclick="sendMail(${index})">Invia Mail</button>
                 </td>
             `;
             reportTableBody.appendChild(row);
         });
 
-        organizeData(); // Organizza i dati e aggiorna il grafico
-        populateFilters(); // Aggiorna i filtri
+        organizeData();
+        populateFilters();
     }
 
     // Aggiungi o modifica un report
     reportForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        const dateTimeValue = reportForm.dateTime.value; // Prendi la data e ora inserite dall'utente
-
         const newReport = {
-            dateTime: dateTimeValue,
+            dateTime: reportForm.dateTime.value,
             production: reportForm.production.value,
             issue: reportForm.issue.value,
             resolution: reportForm.resolution.value,
@@ -213,18 +172,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const editIndex = editIndexField.value;
 
         if (editIndex === "") {
-            // Aggiungi nuovo report
             reports.push(newReport);
         } else {
-            // Modifica report esistente
             reports[editIndex] = newReport;
-            editIndexField.value = ""; // Resetta l'indice del report da modificare
+            editIndexField.value = "";
         }
 
-        localStorage.setItem('reports', JSON.stringify(reports)); // Salva i report aggiornati nel localStorage
-        displayReports(); // Aggiorna la tabella e il grafico
-
-        // Resetta il form dopo l'inserimento o la modifica
+        localStorage.setItem('reports', JSON.stringify(reports));
+        displayReports();
         reportForm.reset();
     });
 
@@ -236,29 +191,30 @@ document.addEventListener('DOMContentLoaded', () => {
         reportForm.issue.value = report.issue;
         reportForm.resolution.value = report.resolution;
         reportForm.notes.value = report.notes;
-        editIndexField.value = index; // Imposta l'indice del report che si sta modificando
+        editIndexField.value = index;
     };
 
     // Funzione per rimuovere un report
     window.deleteReport = function(index) {
-        reports.splice(index, 1); // Rimuovi il report dall'array
-        localStorage.setItem('reports', JSON.stringify(reports)); // Aggiorna il localStorage
-        displayReports(); // Mostra nuovamente la tabella e aggiorna il grafico
+        if (confirm('Sei sicuro di voler eliminare questo report?')) {
+            reports.splice(index, 1);
+            localStorage.setItem('reports', JSON.stringify(reports));
+            displayReports();
+        }
     };
 
     // Funzione per inviare una mail con i dettagli del report
     window.sendMail = function(index) {
         const report = reports[index];
-        const dateTimeString = report.dateTime + ':00Z';
-        const date = new Date(dateTimeString);
-        const dateString = date.toLocaleDateString();
+        const date = new Date(report.dateTime);
+        const dateString = date.toLocaleString();
 
         const subject = `Report del ${dateString}`;
-        const body = `Produzione: ${report.production}\nProblema: ${report.issue}\nRisoluzione: ${report.resolution}\nNote: ${report.notes}`;
+        const body = `
+Produzione: ${report.production}
+Problema: ${report.issue}
+Risoluzione: ${report.resolution}
+Note: ${report.notes}
+        `;
 
-        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    };
-
-    // Mostra i report salvati al caricamento della pagina
-    displayReports();
-});
+        const mailtoLink = `mailto:?subject=${encodeURIComponent(
