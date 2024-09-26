@@ -1,14 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const reportForm = document.getElementById('reportForm');
     const reportTableBody = document.querySelector('#reportTable tbody');
-    const editIndexField = document.getElementById('editIndex');
+    const editIndexField = document.getElementById('editIndex'); // Campo nascosto per l'indice della modifica
 
-    // Carica i report dal localStorage
+    // Carica i report dal localStorage o crea un array vuoto
     let reports = JSON.parse(localStorage.getItem('reports')) || [];
 
-    // Mostra i report nella tabella
+    // Funzione per mostrare i report nella tabella
     function displayReports() {
-        reportTableBody.innerHTML = ''; // Pulisce la tabella prima di inserire nuovi dati
+        reportTableBody.innerHTML = ''; // Svuota la tabella prima di inserire i nuovi dati
         reports.forEach((report, index) => {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         const newReport = {
-            dateTime: new Date().toLocaleString(),
+            dateTime: new Date().toLocaleString(), // Aggiungi la data e ora attuali
             production: reportForm.production.value,
             issue: reportForm.issue.value,
             resolution: reportForm.resolution.value,
@@ -41,22 +41,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const editIndex = editIndexField.value;
 
         if (editIndex === "") {
-            // Aggiungi nuovo report
+            // Aggiungi un nuovo report
             reports.push(newReport);
         } else {
-            // Modifica report esistente
+            // Modifica il report esistente all'indice
             reports[editIndex] = newReport;
-            editIndexField.value = "";  // Resetta il campo di modifica
+            editIndexField.value = "";  // Resetta l'indice del report da modificare
         }
 
+        // Salva l'array dei report nel localStorage
         localStorage.setItem('reports', JSON.stringify(reports));
-        displayReports();
+        displayReports(); // Mostra nuovamente la tabella aggiornata
 
         // Resetta il form dopo l'inserimento o modifica
         reportForm.reset();
     });
 
-    // Funzione per caricare un report nel form per la modifica
+    // Funzione per caricare i dati del report selezionato nel form per la modifica
     window.editReport = function(index) {
         const report = reports[index];
         reportForm.production.value = report.production;
@@ -69,8 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Funzione per rimuovere un report
     window.deleteReport = function(index) {
         reports.splice(index, 1);  // Rimuovi il report dall'array
-        localStorage.setItem('reports', JSON.stringify(reports));
-        displayReports();
+        localStorage.setItem('reports', JSON.stringify(reports)); // Aggiorna il localStorage
+        displayReports(); // Mostra nuovamente la tabella aggiornata
     };
 
     // Mostra i report salvati al caricamento della pagina
