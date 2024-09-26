@@ -13,38 +13,40 @@ document.addEventListener('DOMContentLoaded', () => {
     function createChart(monthlyData) {
         const ctx = document.getElementById('issueChart').getContext('2d');
 
-        const labels = Object.keys(monthlyData); // I mesi
+        const labels = Object.keys(monthlyData); // Mesi
         const datasets = [];
 
-        // Creiamo un dataset per ogni produzione e causa del problema
-        const productions = [...new Set(reports.map(report => report.production))]; // Raccoglie tutte le produzioni
-        const issues = [...new Set(reports.map(report => report.issue))]; // Raccoglie tutte le cause dei problemi
+        // Troviamo tutte le produzioni e le cause dei problemi
+        const productions = [...new Set(reports.map(report => report.production))];
+        const issues = [...new Set(reports.map(report => report.issue))];
 
-        issues.forEach(issue => {
-            datasets.push({
-                label: issue, // Ogni causa del problema
-                data: labels.map(month => {
-                    let total = 0;
-                    productions.forEach(prod => {
-                        total += monthlyData[month]?.[prod]?.[issue] || 0;
-                    });
-                    return total;
-                }),
-                backgroundColor: getRandomColor(),
-                borderColor: getRandomColor(),
-                borderWidth: 1
+        // Per ogni combinazione di produzione e causa del problema, creiamo un dataset
+        productions.forEach(production => {
+            issues.forEach(issue => {
+                const data = labels.map(month => {
+                    return monthlyData[month]?.[production]?.[issue] || 0;
+                });
+
+                datasets.push({
+                    label: `${production} - ${issue}`, // Etichetta unendo produzione e problema
+                    data: data,
+                    backgroundColor: getRandomColor(),
+                    borderColor: getRandomColor(),
+                    borderWidth: 1
+                });
             });
         });
 
+        // Se un grafico esiste già, distruggilo prima di crearne uno nuovo
         if (chart) {
-            chart.destroy(); // Distruggi il grafico precedente prima di crearne uno nuovo
+            chart.destroy();
         }
 
         chart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: labels, // I mesi
-                datasets: datasets // I dati per ogni causa del problema
+                labels: labels, // Mesi
+                datasets: datasets // Dati per produzione e causa del problema
             },
             options: {
                 scales: {
@@ -70,20 +72,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         reports.forEach(report => {
             const date = new Date(report.dateTime);
-            const month = date.toLocaleString('default', { month: 'long', year: 'numeric' }); // Otteniamo il mese in formato testo
+            const month = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            // Inizializza la struttura dei dati
             if (!monthlyData[month]) {
                 monthlyData[month] = {};
             }
+
             if (!monthlyData[month][report.production]) {
                 monthlyData[month][report.production] = {};
             }
+
             if (!monthlyData[month][report.production][report.issue]) {
                 monthlyData[month][report.production][report.issue] = 0;
             }
+
+            // Incrementa il conteggio dei problemi per produzione e causa del problema
             monthlyData[month][report.production][report.issue]++;
         });
 
-        createChart(monthlyData); // Crea il grafico con i dati organizzati
+        // Crea il grafico con i dati organizzati
+        createChart(monthlyData);
     }
 
     // Funzione per mostrare i report nella tabella
@@ -159,4 +168,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mostra i report salvati al caricamento della pagina
     displayReports();
 });
-
