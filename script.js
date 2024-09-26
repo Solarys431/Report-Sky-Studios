@@ -1,3 +1,140 @@
+// Configurazione GitHub
+const GITHUB_USERNAME = 'solarys431';
+const GITHUB_REPO = 'Report-Sky-Studios';
+const GITHUB_FILE_PATH = 'reports.json';
+const GITHUB_TOKEN = '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'; // Sostituisci con il tuo token
+
+// Funzione per caricare i report da GitHub
+async function loadReportsFromGitHub() {
+    try {
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`
+            }
+        });
+        const data = await response.json();
+        const content = atob(data.content);
+        return JSON.parse(content);
+    } catch (error) {
+        console.error('Errore nel caricamento dei report da GitHub:', error);
+        return [];
+    }
+}
+
+// Funzione per salvare i report su GitHub
+async function saveReportsToGitHub(reports) {
+    try {
+        const currentFile = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`
+            }
+        }).then(res => res.json());
+
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}/contents/${GITHUB_FILE_PATH}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `token ${GITHUB_TOKEN}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: 'Aggiornamento reports',
+                content: btoa(JSON.stringify(reports)),
+                sha: currentFile.sha
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Errore nel salvataggio dei report su GitHub');
+        }
+    } catch (error) {
+        console.error('Errore nel salvataggio dei report su GitHub:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const reportForm = document.getElementById('reportForm');
+    const reportTableBody = document.querySelector('#reportTable tbody');
+    const editIndexField = document.getElementById('editIndex');
+
+    // Filtri
+    const filterDate = document.getElementById('filterDate');
+    const filterProduction = document.getElementById('filterProduction');
+    const filterIssue = document.getElementById('filterIssue');
+
+    filterDate.addEventListener('change', displayReports);
+    filterProduction.addEventListener('change', displayReports);
+    filterIssue.addEventListener('change', displayReports);
+
+    // Carica i report da GitHub
+    let reports = await loadReportsFromGitHub();
+
+    // ... (il resto del codice rimane lo stesso)
+
+    // Modifica la funzione displayReports per caricare i dati da GitHub
+    async function displayReports() {
+        reports = await loadReportsFromGitHub(); // Ricarica i report da GitHub
+        reportTableBody.innerHTML = '';
+
+        const selectedDate = filterDate.value;
+        const selectedProduction = filterProduction.value;
+        const selectedIssue = filterIssue.value;
+
+        reports.forEach((report, index) => {
+            // ... (il resto del codice rimane lo stesso)
+        });
+
+        organizeData();
+        populateFilters();
+    }
+
+    // Modifica la gestione del form per salvare su GitHub
+    reportForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const newReport = {
+            dateTime: reportForm.dateTime.value,
+            production: reportForm.production.value,
+            issue: reportForm.issue.value,
+            resolution: reportForm.resolution.value,
+            notes: reportForm.notes.value
+        };
+
+        const editIndex = editIndexField.value;
+
+        if (editIndex === "") {
+            reports.push(newReport);
+        } else {
+            reports[editIndex] = newReport;
+            editIndexField.value = "";
+        }
+
+        await saveReportsToGitHub(reports);
+        await displayReports();
+        reportForm.reset();
+    });
+
+    // Modifica le funzioni di modifica e eliminazione
+    window.editReport = function(index) {
+        const report = reports[index];
+        reportForm.dateTime.value = report.dateTime;
+        reportForm.production.value = report.production;
+        reportForm.issue.value = report.issue;
+        reportForm.resolution.value = report.resolution;
+        reportForm.notes.value = report.notes;
+        editIndexField.value = index;
+    };
+
+    window.deleteReport = async function(index) {
+        if (confirm('Sei sicuro di voler eliminare questo report?')) {
+            reports.splice(index, 1);
+            await saveReportsToGitHub(reports);
+            await displayReports();
+        }
+    };
+
+    // Carica i report iniziali
+    await displayReports();
+});
 document.addEventListener('DOMContentLoaded', () => {
     const reportForm = document.getElementById('reportForm');
     const reportTableBody = document.querySelector('#reportTable tbody');
