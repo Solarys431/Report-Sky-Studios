@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reportistica Tecnica TV</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Libreria Chart.js -->
 </head>
 <body>
     <div class="container">
         <h1>Inserisci un nuovo report</h1>
         <form id="reportForm">
             <input type="hidden" id="editIndex" value="">
-            
+
             <label for="production">Produzione:</label>
             <select name="production" id="production" required>
                 <option value="TG24">TG24</option>
@@ -68,6 +69,10 @@
                 <!-- I report saranno inseriti qui -->
             </tbody>
         </table>
+
+        <!-- Area del grafico -->
+        <h2>Grafico dei Problemi per Produzione</h2>
+        <canvas id="issueChart" width="400" height="200"></canvas>
     </div>
 
     <script src="script.js"></script>
