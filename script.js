@@ -2,7 +2,7 @@
 const GITHUB_USERNAME = 'solarys431';
 const GITHUB_REPO = 'Report-Sky-Studios';
 const GITHUB_FILE_PATH = 'reports.json';
-const GITHUB_TOKEN = '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'; // Sostituisci con il tuo token
+const GITHUB_TOKEN = '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'; // Sostituisci con il tuo token
 
 // Verifica iniziale dell'accesso all'API di GitHub
 fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${GITHUB_REPO}`, {
