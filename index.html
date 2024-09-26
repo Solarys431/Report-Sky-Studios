@@ -13,6 +13,9 @@
         <form id="reportForm">
             <input type="hidden" id="editIndex" value="">
 
+            <label for="dateTime">Data e Ora:</label>
+            <input type="datetime-local" id="dateTime" name="dateTime" required><br><br>
+
             <label for="production">Produzione:</label>
             <select name="production" id="production" required>
                 <option value="TG24">TG24</option>
@@ -54,10 +57,28 @@
         </form>
 
         <h2>Storico Report</h2>
+
+        <div class="filter-group">
+            <label for="filterDate">Filtra per Data:</label>
+            <select id="filterDate">
+                <option value="all">Tutte le Date</option>
+            </select>
+
+            <label for="filterProduction">Filtra per Produzione:</label>
+            <select id="filterProduction">
+                <option value="all">Tutte le Produzioni</option>
+            </select>
+
+            <label for="filterIssue">Filtra per Problema:</label>
+            <select id="filterIssue">
+                <option value="all">Tutti i Problemi</option>
+            </select>
+        </div>
+
         <table id="reportTable">
             <thead>
                 <tr>
-                    <th>Data e Ora</th>
+                    <th>Data</th>
                     <th>Produzione</th>
                     <th>Problema</th>
                     <th>Risoluzione</th>
@@ -72,7 +93,7 @@
 
         <!-- Area del grafico -->
         <h2>Grafico dei Problemi per Mese, Produzione e Causa</h2>
-        <canvas id="issueChart" width="400" height="200"></canvas> <!-- Canvas per il grafico -->
+        <canvas id="issueChart" width="400" height="200"></canvas>
     </div>
 
     <script src="script.js"></script>
