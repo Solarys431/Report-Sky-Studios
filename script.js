@@ -9,7 +9,7 @@ function generateUniqueId() {
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `${year}${month}${day}-${random}`;
+    return `REP-${year}${month}${day}-${random}`;
 }
 
 // Funzione per caricare i report da JSONBin
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             reports.push(newReport);
         } else {
             // Mantiene l'ID esistente se si sta modificando un report
-            newReport.id = reports[editIndex].id;
+            newReport.id = reports[editIndex].id || generateUniqueId();
             reports[editIndex] = newReport;
             editIndexField.value = "";
         }
@@ -286,20 +286,17 @@ Note: ${report.notes}
 
     // Carica i report iniziali
     await displayReports();
-});
 
-// Aggiungi questo stile alla tua pagina HTML o al tuo file CSS
-const style = document.createElement('style');
-style.textContent = `
-    #reportTable th, #reportTable td {
-        background-color: #f8f9fa;
-        color: #212529;
-        padding: 10px;
-        border: 1px solid #dee2e6;
+    // Aggiungi stile alle intestazioni della tabella
+    const reportTable = document.getElementById('reportTable');
+    if (reportTable) {
+        const headers = reportTable.querySelectorAll('th');
+        headers.forEach(header => {
+            header.style.backgroundColor = '#e9ecef';
+            header.style.color = '#495057';
+            header.style.fontWeight = 'bold';
+            header.style.padding = '10px';
+            header.style.border = '1px solid #dee2e6';
+        });
     }
-    #reportTable th {
-        background-color: #e9ecef;
-        font-weight: bold;
-    }
-`;
-document.head.appendChild(style);
+});
