@@ -1,6 +1,6 @@
 // Configurazione JSONBin
-const BIN_ID = 'IL_TUO_BIN_ID'; // Sostituisci con il tuo Bin ID
-const API_KEY = 'LA_TUA_API_KEY'; // Sostituisci con la tua X-Master-Key
+const BIN_ID = '66f591daad19ca34f8ae0b22'; // Sostituisci con il tuo Bin ID
+const API_KEY = '$2a$10$z.gsA2cdHbVfQZ6rB8VKw.kv0kkW1KsuMYDim97yQsCw.fYk1S0j2'; // Sostituisci con la tua X-Master-Key
 
 // Funzione per generare un ID univoco per il report
 function generateUniqueId() {
