@@ -1,6 +1,16 @@
 // Configurazione JSONBin
-const BIN_ID = '66f591daad19ca34f8ae0b22'; // Sostituisci con il tuo Bin ID
-const API_KEY = '$2a$10$z.gsA2cdHbVfQZ6rB8VKw.kv0kkW1KsuMYDim97yQsCw.fYk1S0j2'; // Sostituisci con la tua X-Master-Key
+const BIN_ID = 'IL_TUO_BIN_ID'; // Sostituisci con il tuo Bin ID
+const API_KEY = 'LA_TUA_API_KEY'; // Sostituisci con la tua X-Master-Key
+
+// Funzione per generare un ID univoco per il report
+function generateUniqueId() {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    return `${year}${month}${day}-${random}`;
+}
 
 // Funzione per caricare i report da JSONBin
 async function loadReportsFromJSONBin() {
@@ -186,6 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
+                    <td>${report.id || 'N/A'}</td>
                     <td>${reportDateString}</td>
                     <td>${report.production}</td>
                     <td>${report.issue}</td>
@@ -212,6 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
 
         const newReport = {
+            id: generateUniqueId(),
             dateTime: reportForm.dateTime.value,
             production: reportForm.production.value,
             issue: reportForm.issue.value,
@@ -224,6 +236,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (editIndex === "") {
             reports.push(newReport);
         } else {
+            // Mantiene l'ID esistente se si sta modificando un report
+            newReport.id = reports[editIndex].id;
             reports[editIndex] = newReport;
             editIndexField.value = "";
         }
@@ -257,8 +271,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const date = new Date(report.dateTime);
         const dateString = date.toLocaleString();
 
-        const subject = `Report del ${dateString}`;
+        const subject = `Report ${report.id} del ${dateString}`;
         const body = `
+ID Report: ${report.id}
+Data: ${dateString}
 Produzione: ${report.production}
 Problema: ${report.issue}
 Risoluzione: ${report.resolution}
@@ -271,3 +287,19 @@ Note: ${report.notes}
     // Carica i report iniziali
     await displayReports();
 });
+
+// Aggiungi questo stile alla tua pagina HTML o al tuo file CSS
+const style = document.createElement('style');
+style.textContent = `
+    #reportTable th, #reportTable td {
+        background-color: #f8f9fa;
+        color: #212529;
+        padding: 10px;
+        border: 1px solid #dee2e6;
+    }
+    #reportTable th {
+        background-color: #e9ecef;
+        font-weight: bold;
+    }
+`;
+document.head.appendChild(style);
