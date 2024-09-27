@@ -3,7 +3,7 @@ const BIN_ID = '66f591daad19ca34f8ae0b22'; // Sostituisci con il tuo Bin ID
 const API_KEY = '$2a$10$z.gsA2cdHbVfQZ6rB8VKw.kv0kkW1KsuMYDim97yQsCw.fYk1S0j2'; // Sostituisci con la tua X-Master-Key
 
 // Costanti per la paginazione
-const REPORTS_PER_PAGE = 20;
+const REPORTS_PER_PAGE = 5;
 
 // Funzione per generare un ID univoco per il report
 function generateUniqueId() {
@@ -291,19 +291,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (editIndex === "") {
             reports.unshift(newReport); // Aggiungi il nuovo report all'inizio dell'array
+            showPopup('Report inserito correttamente!');
         } else {
             newReport.id = reports[editIndex].id || generateUniqueId();
             reports[editIndex] = newReport;
             editIndexField.value = "";
+            showPopup('Report modificato correttamente!');
         }
 
         await saveReportsToJSONBin(reports);
         await displayReports();
         reportForm.reset();
 
-        showPopup('Report inserito correttamente!');
         scrollToNewReport();
-        currentPage = 1; // Torna alla prima pagina dopo l'inserimento
+        currentPage = 1; // Torna alla prima pagina dopo l'inserimento o la modifica
     });
 
     // Funzioni di modifica e eliminazione
