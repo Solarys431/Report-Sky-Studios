@@ -2,14 +2,13 @@
 const BIN_ID = '66f591daad19ca34f8ae0b22'; // Sostituisci con il tuo Bin ID
 const API_KEY = '$2a$10$z.gsA2cdHbVfQZ6rB8VKw.kv0kkW1KsuMYDim97yQsCw.fYk1S0j2'; // Sostituisci con la tua X-Master-Key
 
+// Costanti per la paginazione
+const REPORTS_PER_PAGE = 20;
+
 // Funzione per generare un ID univoco per il report
 function generateUniqueId() {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    return `REP-${year}${month}${day}-${random}`;
+    const random = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    return `REP-${random}`;
 }
 
 // Funzione per caricare i report da JSONBin
@@ -68,8 +67,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     filterProduction.addEventListener('change', displayReports);
     filterIssue.addEventListener('change', displayReports);
 
-    // Variabile globale per i report
+    // Variabili globali
     let reports = [];
+    let currentPage = 1;
+
+    // Funzione per mostrare il popup
+    function showPopup(message) {
+        const popup = document.createElement('div');
+        popup.className = 'alert alert-success alert-dismissible fade show';
+        popup.setAttribute('role', 'alert');
+        popup.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.querySelector('.container').prepend(popup);
+
+        // Rimuovi il popup dopo 5 secondi
+        setTimeout(() => {
+            popup.remove();
+        }, 5000);
+    }
+
+    // Funzione per scorrere alla posizione del nuovo report
+    function scrollToNewReport() {
+        const reportTable = document.getElementById('reportTable');
+        const tableRect = reportTable.getBoundingClientRect();
+        window.scrollTo({
+            top: window.pageYOffset + tableRect.top,
+            behavior: 'smooth'
+        });
+    }
 
     // Funzione per creare il grafico con i dati organizzati per mese, produzione e causa del problema
     function createChart(monthlyData) {
@@ -186,13 +213,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const selectedProduction = filterProduction.value;
             const selectedIssue = filterIssue.value;
 
-            reports.forEach((report, index) => {
+            const filteredReports = reports.filter(report => {
                 const date = new Date(report.dateTime);
                 const reportDateString = date.toLocaleDateString();
+                return (selectedDate === 'all' || selectedDate === reportDateString) &&
+                       (selectedProduction === 'all' || selectedProduction === report.production) &&
+                       (selectedIssue === 'all' || selectedIssue === report.issue);
+            });
 
-                if (selectedDate !== 'all' && selectedDate !== reportDateString) return;
-                if (selectedProduction !== 'all' && selectedProduction !== report.production) return;
-                if (selectedIssue !== 'all' && selectedIssue !== report.issue) return;
+            const startIndex = (currentPage - 1) * REPORTS_PER_PAGE;
+            const endIndex = startIndex + REPORTS_PER_PAGE;
+            const paginatedReports = filteredReports.slice(startIndex, endIndex);
+
+            paginatedReports.forEach((report, index) => {
+                const date = new Date(report.dateTime);
+                const reportDateString = date.toLocaleDateString();
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -203,20 +238,41 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td>${report.resolution}</td>
                     <td>${report.notes}</td>
                     <td>
-                        <button class="btn btn-sm btn-warning edit" onclick="editReport(${index})">Modifica</button>
-                        <button class="btn btn-sm btn-danger delete" onclick="deleteReport(${index})">Rimuovi</button>
-                        <button class="btn btn-sm btn-success send-mail" onclick="sendMail(${index})">Invia Mail</button>
+                        <button class="btn btn-sm btn-warning edit" onclick="editReport(${reports.indexOf(report)})">Modifica</button>
+                        <button class="btn btn-sm btn-danger delete" onclick="deleteReport(${reports.indexOf(report)})">Rimuovi</button>
+                        <button class="btn btn-sm btn-success send-mail" onclick="sendMail(${reports.indexOf(report)})">Invia Mail</button>
                     </td>
                 `;
                 reportTableBody.appendChild(row);
             });
 
+            updatePagination(filteredReports.length);
             organizeData();
             populateFilters();
         } catch (error) {
             console.error('Errore nella visualizzazione dei report:', error);
         }
     }
+
+    // Funzione per aggiornare la paginazione
+    function updatePagination(totalReports) {
+        const totalPages = Math.ceil(totalReports / REPORTS_PER_PAGE);
+        const paginationElement = document.getElementById('pagination');
+        paginationElement.innerHTML = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+            paginationElement.appendChild(li);
+        }
+    }
+
+    // Funzione per cambiare pagina
+    window.changePage = function(page) {
+        currentPage = page;
+        displayReports();
+    };
 
     // Gestione del form per salvare su JSONBin
     reportForm.addEventListener('submit', async (e) => {
@@ -234,9 +290,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const editIndex = editIndexField.value;
 
         if (editIndex === "") {
-            reports.push(newReport);
+            reports.unshift(newReport); // Aggiungi il nuovo report all'inizio dell'array
         } else {
-            // Mantiene l'ID esistente se si sta modificando un report
             newReport.id = reports[editIndex].id || generateUniqueId();
             reports[editIndex] = newReport;
             editIndexField.value = "";
@@ -245,6 +300,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         await saveReportsToJSONBin(reports);
         await displayReports();
         reportForm.reset();
+
+        showPopup('Report inserito correttamente!');
+        scrollToNewReport();
+        currentPage = 1; // Torna alla prima pagina dopo l'inserimento
     });
 
     // Funzioni di modifica e eliminazione
