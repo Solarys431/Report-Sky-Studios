@@ -1,123 +1,70 @@
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #e9ecef;
+    background-color: #f8f9fa;
 }
 
 .container {
-    max-width: 800px;
-    margin: auto;
     background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
     padding: 20px;
-    border-radius: 5px;
 }
 
 h1, h2 {
-    text-align: center;
-    color: #343a40;
+    color: #007bff;
 }
 
-form {
-    margin-bottom: 30px;
-}
-
-form label {
-    display: block;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-form input, form select, form textarea {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    box-sizing: border-box;
-}
-
-textarea {
-    resize: vertical;
-}
-
-button {
-    background-color: #007BFF;
-    color: white;
-    padding: 10px;
-    border: none;
-    cursor: pointer;
-    margin-top: 10px;
-    border-radius: 5px;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.filter-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+.card {
     margin-bottom: 20px;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.filter-group label {
-    flex: 1 1 100%;
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
 }
 
-.filter-group select {
-    flex: 1 1 calc(33% - 10px);
+.table th {
+    background-color: #e9ecef;
+    color: #495057;
+    font-weight: bold;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
+.pagination {
     margin-top: 20px;
 }
 
-table, th, td {
-    border: 1px solid #dddddd;
-    text-align: center;
-    padding: 8px;
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
 }
 
-th {
-    background-color: #343a40;
-    color: white;
+.pagination .page-link {
+    color: #007bff;
 }
 
-tr:nth-child(even) {
-    background-color: #f2f2f2;
+.alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
 }
 
-tr:hover {
-    background-color: #e9ecef;
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
 }
 
-button {
-    margin: 5px;
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
 }
 
-button.edit {
-    background-color: #ffc107;
+#issueChart {
+    max-height: 400px;
 }
 
-button.delete {
-    background-color: #dc3545;
-}
-
-button.send-mail {
-    background-color: #28a745;
-}
-
-button.edit:hover {
-    background-color: #e0a800;
-}
-
-button.delete:hover {
-    background-color: #c82333;
-}
-
-button.send-mail:hover {
-    background-color: #218838;
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
 }
